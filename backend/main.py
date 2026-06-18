@@ -3,7 +3,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 # Load environment variables from the root folder if present
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
@@ -44,7 +45,7 @@ async def chat_endpoint(request: ChatRequest):
         )
 
     # Configure the Gemini client
-    genai.configure(api_key=api_key)
+    client = genai.Client(api_key=api_key)
 
     try:
         context = load_knowledge_base()
@@ -67,14 +68,14 @@ async def chat_endpoint(request: ChatRequest):
     )
 
     try:
-        # Use gemini-1.5-flash
-        model = genai.GenerativeModel(
-            model_name="gemini-1.5-flash",
-            system_instruction=system_instruction
+        # Request content generation using gemini-2.5-flash and the new client
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=request.message,
+            config=types.GenerateContentConfig(
+                system_instruction=system_instruction
+            )
         )
-        
-        # Request content generation
-        response = model.generate_content(request.message)
         
         # Extract text safely
         answer = response.text.strip() if response.text else "I am sorry, but I cannot find that information in the knowledge base."
