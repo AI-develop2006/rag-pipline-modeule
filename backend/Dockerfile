@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Set default port
-ENV PORT=8000
+ENV PORT=7860
 
 # Start server using uvicorn, binding dynamically to the host's assigned PORT
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
